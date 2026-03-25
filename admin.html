@@ -1,0 +1,134 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - NEXUS Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="content">
+        <nav class="navbar">
+            <div class="logo">NEXUS<span>.admin</span></div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="admin.html">Admin</a>
+            </div>
+        </nav>
+        
+        <div class="admin-panel">
+            <h2 class="section-title">Admin Dashboard</h2>
+            
+            <div class="admin-stats">
+                <div class="admin-card">
+                    <h3>Total Users</h3>
+                    <div class="stat-number" id="total-users">0</div>
+                </div>
+                <div class="admin-card">
+                    <h3>Total Orders</h3>
+                    <div class="stat-number" id="total-orders">0</div>
+                </div>
+                <div class="admin-card">
+                    <h3>Revenue</h3>
+                    <div class="stat-number" id="total-revenue">₹0</div>
+                </div>
+            </div>
+            
+            <canvas id="analytics-chart" style="max-width: 800px; margin: 2rem auto;"></canvas>
+            
+            <h3>Recent Users</h3>
+            <table class="admin-table" id="users-table">
+                <thead>
+                    <tr><th>Name</th><th>Email</th><th>Joined</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            
+            <h3>Recent Orders</h3>
+            <table class="admin-table" id="orders-table">
+                <thead>
+                    <tr><th>Product</th><th>Amount</th><th>User</th><th>Date</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script src="firebase-config.js"></script>
+    <script>
+        // Check if user is admin
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const adminCheck = await db.collection('admins').doc(user.uid).get();
+                if (!adminCheck.exists) {
+                    alert('Access denied. Admin only.');
+                    window.location.href = 'index.html';
+                } else {
+                    loadAdminData();
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+        
+        async function loadAdminData() {
+            // Load users
+            const usersSnapshot = await db.collection('users').get();
+            document.getElementById('total-users').innerText = usersSnapshot.size;
+            
+            const usersTable = document.querySelector('#users-table tbody');
+            usersTable.innerHTML = '';
+            usersSnapshot.forEach(doc => {
+                const user = doc.data();
+                usersTable.innerHTML += `
+                    <tr>
+                        <td>${user.name || 'N/A'}</td>
+                        <td>${user.email}</td>
+                        <td>${user.createdAt?.toDate().toLocaleDateString() || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+            
+            // Load orders
+            const ordersSnapshot = await db.collection('orders').get();
+            document.getElementById('total-orders').innerText = ordersSnapshot.size;
+            
+            let totalRevenue = 0;
+            const ordersTable = document.querySelector('#orders-table tbody');
+            ordersTable.innerHTML = '';
+            ordersSnapshot.forEach(doc => {
+                const order = doc.data();
+                totalRevenue += order.amount || 0;
+                ordersTable.innerHTML += `
+                    <tr>
+                        <td>${order.product}</td>
+                        <td>₹${order.amount}</td>
+                        <td>${order.userId}</td>
+                        <td>${order.timestamp?.toDate().toLocaleDateString() || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('total-revenue').innerText = `₹${totalRevenue}`;
+            
+            // Create chart
+            const ctx = document.getElementById('analytics-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [12000, 19000, 15000, 22000, 28000, totalRevenue],
+                        borderColor: '#00ff88',
+                        backgroundColor: 'rgba(0,255,136,0.1)'
+                    }]
+                }
+            });
+        }
+    </script>
+</body>
+</html>
