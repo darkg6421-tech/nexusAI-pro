@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store - NEXUS Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="content">
+        <nav class="navbar">
+            <div class="logo">NEXUS<span>.store</span></div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="ecommerce.html">Shop</a>
+                <a href="games.html">Games</a>
+            </div>
+        </nav>
+        
+        <h2 class="section-title">Featured Products</h2>
+        <div class="products-grid" id="products-grid"></div>
+    </div>
+    
+    <script src="firebase-config.js"></script>
+    <script>
+        const products = [
+            { id: 1, name: "AI Pro License", price: 4999, image: "https://picsum.photos/300/200?random=1", description: "Full access to AI features" },
+            { id: 2, name: "Developer Bundle", price: 9999, image: "https://picsum.photos/300/200?random=2", description: "Complete developer toolkit" },
+            { id: 3, name: "Cloud Storage 100GB", price: 1999, image: "https://picsum.photos/300/200?random=3", description: "Secure cloud storage" },
+            { id: 4, name: "Premium Support", price: 2999, image: "https://picsum.photos/300/200?random=4", description: "24/7 priority support" }
+        ];
+        
+        function displayProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <div class="price">₹${product.price}</div>
+                    <button class="buy-btn" onclick="buyProduct(${product.id})">Buy Now</button>
+                </div>
+            `).join('');
+        }
+        
+        function buyProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!firebase.auth().currentUser) {
+                alert('Please login first');
+                window.location.href = 'login.html';
+                return;
+            }
+            initPayment(product.price, product.name);
+        }
+        
+        displayProducts();
+    </script>
+</body>
+</html>
