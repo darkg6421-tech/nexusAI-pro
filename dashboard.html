@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - NEXUS Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="content">
+        <nav class="navbar">
+            <div class="logo">NEXUS<span>.dashboard</span></div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="ecommerce.html">Shop</a>
+                <a href="games.html">Games</a>
+            </div>
+        </nav>
+        
+        <div style="padding: 2rem;">
+            <h2 class="section-title">Welcome, <span id="user-name-display">User</span>!</h2>
+            
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-item">
+                    <div class="stat-number" id="user-orders">0</div>
+                    <div class="stat-label">Your Orders</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="user-spent">₹0</div>
+                    <div class="stat-label">Total Spent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="user-games">0</div>
+                    <div class="stat-label">Games Played</div>
+                </div>
+            </div>
+            
+            <canvas id="user-chart" style="max-width: 600px; margin: 0 auto;"></canvas>
+            
+            <h3>Your Recent Orders</h3>
+            <table class="admin-table" id="user-orders-table">
+                <thead><tr><th>Product</th><th>Amount</th><th>Date</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script src="firebase-config.js"></script>
+    <script>
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            document.getElementById('user-name-display').innerText = user.displayName || user.email;
+            
+            // Load user orders
+            const ordersSnapshot = await db.collection('orders')
+                .where('userId', '==', user.uid)
+                .get();
+            
+            document.getElementById('user-orders').innerText = ordersSnapshot.size;
+            
+            let totalSpent = 0;
+            const ordersTable = document.querySelector('#user-orders-table tbody');
+            ordersSnapshot.forEach(doc => {
+                const order = doc.data();
+                totalSpent += order.amount || 0;
+                ordersTable.innerHTML += `
+                    <tr>
+                        <td>${order.product}</td>
+                        <td>₹${order.amount}</td>
+                        <td>${order.timestamp?.toDate().toLocaleDateString() || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('user-spent').innerText = `₹${totalSpent}`;
+            
+            // Load games played
+            const gamesSnapshot = await db.collection('game_scores')
+                .where('userId', '==', user.uid)
+                .get();
+            document.getElementById('user-games').innerText = gamesSnapshot.size;
+            
+            // Create chart
+            const ctx = document.getElementById('user-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Games', 'Products', 'Services'],
+                    datasets: [{
+                        data: [gamesSnapshot.size, ordersSnapshot.size, 0],
+                        backgroundColor: ['#00ff88', '#00aaff', '#ff44aa']
+                    }]
+                }
+            });
+        });
+    </script>
+</body>
+</html>
