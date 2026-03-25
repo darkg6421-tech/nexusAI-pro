@@ -1,0 +1,89 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS PLATFORM | All-in-One Suite</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="content">
+        <nav class="navbar">
+            <div class="logo">NEXUS<span>.platform</span></div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="ecommerce.html">Shop</a>
+                <a href="games.html">Games</a>
+                <a href="#" id="auth-btn" onclick="handleAuth()">Login</a>
+            </div>
+            <div id="user-info" style="display: none;">
+                <span id="user-name"></span>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="hero-content">
+                <h1>NEXUS Platform</h1>
+                <p>AI-Powered | E-Commerce | Gaming | Analytics | All-in-One Solution</p>
+                <button class="cta-button" onclick="window.location.href='dashboard.html'">
+                    🚀 Launch Platform
+                </button>
+            </div>
+        </div>
+
+        <!-- AI Chatbot Section -->
+        <div class="ai-chatbot-section">
+            <h2 class="section-title">🤖 AI Assistant</h2>
+            <div class="chatbot-container">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="bot-message">Hello! I'm your AI assistant. How can I help you today?</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="user-input" placeholder="Ask me anything..." onkeypress="handleKeyPress(event)">
+                    <button onclick="sendMessage()">Send</button>
+                </div>
+                <div class="ai-tools">
+                    <button onclick="generateImage()">🎨 Generate Image</button>
+                    <button onclick="summarizeText()">📝 Summarize Text</button>
+                    <button onclick="analyzeCode()">💻 Analyze Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="visitors">0</div>
+                    <div class="stat-label">Live Visitors</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="sales">0</div>
+                    <div class="stat-label">Total Sales</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="users">0</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 NEXUS Platform | All-in-One Solution</p>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
